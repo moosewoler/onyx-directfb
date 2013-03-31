@@ -99,13 +99,13 @@ main( int argc, char *argv[] )
           return -3;
      }
 
-     printf( "\nMWO: here\n" );
-
      enum_screens();
-     //enum_input_devices();
+     enum_input_devices();        // tslib无法正常退出，先屏蔽掉
 
      /* Release the super interface. */
      dfb->Release( dfb );
+
+     printf("there\n");
 
      return EXIT_SUCCESS;
 }
@@ -638,6 +638,11 @@ enum_screens( void )
 
      printf( "\n" );
 
+     // MWO: 
+     // dfb             IDirectFB接口。DirectFB的接口是用C语言的结构体实现的，提供了引用计数机制。
+     // EnumScreens()   为回调函数，调用实际的驱动函数，返回硬件信息。
+     // 对于fbdev设备来说，在初始化的时候(fbdev.c/system_initialize())，会调用dfb_screens_register()注册一个screen对象（以及surface对象）
+     // EnumScreens()在枚举的时候就可以得到相关的信息。
      ret = dfb->EnumScreens( dfb, screen_callback, NULL );
      if (ret)
           DirectFBError( "IDirectFB::EnumScreens", ret );

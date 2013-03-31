@@ -10,32 +10,37 @@ fi
 #===============================================================================
 build_for_arm()
 {
-    export CC="${TARGET}-gcc"
-    export CXX="${TARGET}-g++"
-    export AR="${TARGET}-ar"
-    export AS="${TARGET}-as"
-    export RANLIB="${TARGET}-ranlib"
-    export LD="${TARGET}-ld"
-    export STRIP="${TARGET}-strip"
+    export ONYXDIR="/opt/onyx"
+    export PREFIX="${ONYXDIR}/mwo"
+    export PATH=/opt/onyx/arm/bin/:/opt/freescale/usr/local/gcc-4.4.4-glibc-2.11.1-multilib-1.0/arm-fsl-linux-gnueabi/bin/:${PATH}
 
-    export PREFIX=/onyx-mwo
-    export DEST_DIR=/opt
-    export PATH=/opt/onyx/arm/bin/:/opt/freescale/usr/local/gcc-4.4.4-glibc-2.11.1-multilib-1.0/arm-fsl-linux-gnueabi/bin/:$PATH  
+    CLFS_TARGET=arm-linux
+    export CC="${CLFS_TARGET}-gcc"
+    export CXX="${CLFS_TARGET}-g++"
+    export AR="${CLFS_TARGET}-ar"
+    export AS="${CLFS_TARGET}-as"
+    export RANLIB="${CLFS_TARGET}-ranlib"
+    export LD="${CLFS_TARGET}-ld"
+    export STRIP="${CLFS_TARGET}-strip"
 
-    export PKG_CONFIG_PATH=${DEST_DIR}${PREFIX}/lib/pkgconfig:/opt/onyx/arm/lib/pkgconfig/ 
+    export PKG_CONFIG_PATH=${ONYXDIR}/mwo/lib/pkgconfig:/opt/onyx/arm/lib/pkgconfig/ 
     export PKG_CONFIG_LIBDIR=${PKG_CONFIG_PATH}
 
-    export LIBPNG_CFLAGS="-I${DEST_DIR}${PREFIX}/include/libpng12"
-    export FREETYPE_CFLAGS="-I${DEST_DIR}${PREFIX}/include/freetype2 -I${DEST_DIR}${PREFIX}/include"
-    export DIRECTFB_CFLAGS="-I${DEST_DIR}${PREFIX}/include/directfb -I${DEST_DIR}${PREFIX}/include"
-    export CFLAGS="-g -I${DEST_DIR}${PREFIX}/include ${LIBPNG_CFLAGS} ${FREETYPE_CFLAGS} ${DIRECTFB_CFLAGS}"
+    export LIBPNG_CFLAGS="-I${ONYXDIR}/arm/include/libpng12"
+    export LIBPNG_LIBS="-L${ONYXDIR}/arm/lib -lpng12"
 
-    export LIBPNG_LIBS="-L${DEST_DIR}${PREFIX}/lib -lpng12"
-    export FREETYPE_LIBS="-L${DEST_DIR}${PREFIX}/lib -lfreetype"
-    export DIRECTFB_LIBS="-L${DEST_DIR}${PREFIX}/lib -ldirectfb -ldirect -lfusion -lz"
-    export LDFLAGS="-L${DEST_DIR}${PREFIX}/lib ${LIBPNG_LIBS} ${FREETYPE_LIBS} ${DIRECTFB_LIBS}"
+    export FREETYPE_CFLAGS="-I${ONYXDIR}/arm/include/freetype2 -I${ONYXDIR}/arm/include"
+    export FREETYPE_LIBS="-L${ONYXDIR}/arm/lib -lfreetype"
 
-    export QMAKESPEC=/opt/onyx/arm/mkspecs/qws/linux-arm-g++/
+    #export TSLIB_CFLAGS="-I${DEST_DIR}/onyx/arm/include"
+    #export TSLIB_LIBS="-L${DEST_DIR}/onyx/arm/lib -lts"
+
+    export DIRECTFB_CFLAGS="-I${ONYXDIR}/mwo/include/directfb -I${ONYXDIR}/mwo/include"
+    export DIRECTFB_LIBS="-L${ONYXDIR}/mwo/lib -ldirectfb -ldirect -lfusion"
+    export CFLAGS="-g -I${ONYXDIR}/arm/include ${LIBPNG_CFLAGS} ${FREETYPE_CFLAGS} ${DIRECTFB_CFLAGS}"
+    export LDFLAGS="-L${ONYXDIR}/arm/lib ${LIBPNG_LIBS} ${FREETYPE_LIBS} ${DIRECTFB_LIBS}"
+
+    #export QMAKESPEC=/opt/onyx/arm/mkspecs/qws/linux-arm-g++/
 
     install -d build/arm
     export BUILD_DIR="build/arm"
