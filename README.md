@@ -3,14 +3,17 @@ onyx-directfb
 
 port directfb to onyx boox device.
 
-1. surface.DrawString()调用顺序
+1. surface.DrawString()
 --------------------------------
-* DrawString函数指针指向IDirectFBSurface\_DrawString(~/src/display/idirectfbsurface.c)。IDirectFBSurface\_DrawString在最后调用dfb\_gfxcard\_drawstring继续完成文字输出。
-* dfb\_gfxcard\_drawstring(~/src/core/gfxcard.c)会把字符串拆开，支持charset，并以字符索引的形式保存各个字符。然后依次Blit各个字符。Blit使用CoreGraphicsStateClient\_Blit。
-* CoreGraphicsStateClient\_Blit(~/src/core/CoreGraphicsStateClient.cpp)。调用CoreGraphicsState\_Blit。
-* CoreGraphicsState\_Blit(~/src/core/CoreGraphicsState.cpp)，调用IGraphicsState\_Real.Blit。
-* IGraphicsState\_Real::Blit(~/src/core/CoreGraphicsState\_real.cpp)。如果不启用加速的话，会调用dfb\_gfxcard\_batchblit；如果启用加速的话，还会判断是硬件加速还是其他加速，硬件加速调用card\->funcs.Blit，其他加速调用gBlit。
-* gBlit(~/src/gfx/generic/generic\_blit.c)。在gBlit中支持翻转和旋转。定好旋转和翻转的方向后，就选择了位置参数以及Genefx\_Aop\_xxxx。Blit的流程是：
+
+        ~/src/display/idirectfbsurface.c                        IDirectFBSurface_DrawString()
+            ~/src/core/gfxcard.c                                dfb_gfxcard_drawstring()        该函数会把字符串拆成单个字符，支持charset，以字符索引的形式保存各个字符。然后依次Blit各个字符。
+                ~/src/core/CoreGraphicsStateClient.cpp          CoreGraphicsStateClient_Blit()  
+                    ~/src/core/CoreGraphicsState.cpp            CoreGraphicsState_Blit()
+                        ~/src/core/CoreGraphicsState_real.cpp   IGraphicsState_Real::Blit()     如果不启用加速的话，会调用dfb_gfxcard_batchblit；如果启用加速的话，还会判断是硬件加速还是其他加速，硬件加速调用card->funcs.Blit，其他加速调用gBlit。
+                            ~/src/gfx/generic/generic_blit.c    gBlit()                         gBlit支持翻转和旋转。
+                            
+gBlit的流程是：
         
         Aop_xy, Bop_xy
         操作流水线
@@ -20,8 +23,9 @@ port directfb to onyx boox device.
         Bop_advance
         Bop_advance
         ABacc_flush
-gfx/generic是directfb实现的虚拟GPU——“Genefx”（发音：genie facts）
-* 上述这些函数都在~/src/gfx/generic/generic\_util.c。好像到底了，可是在哪里操作实际的fb呢？在“操作流水线”中，会依次调用流水线函数，这些函数看起来都是内存操作。
+~/src/gfx/generic是directfb实现的虚拟GPU——“Genefx”（发音：genie facts）
+
+上述这些软件显卡流水线操作都在~/src/gfx/generic/generic\_util.c中。好像到底了，可是在哪里操作实际的fb呢？在“操作流水线”中，会依次调用流水线函数，这些函数看起来都是内存操作。
 
 2. Pixel format
 ---------------
@@ -85,3 +89,23 @@ directfb中被定义为Core Part的对象共有9个，分别是：
     * system\_core       对于directfb来说，system指不同的平台，如：fbdev,x11,osx...
     * wm\_core
 
+8. IDirectFB::CreateSurface()
+-----------------------------
+本体是IDirectFB\_CreateSurface()
+
+        ~/src/idirectfb.c                           IDirectFB_CreateSurface()   由surface_desc.caps的DSCAPS_PRIMARY标志来控制创建的表面是否为主表面。如果是普通表面的话，将调用CoreDFB\_CreateSurface()来创建。
+            ~/src/core/CoreDFB.cpp                  CoreDFB_CreateSurface()     由real.CreateSurface()实际完成。CoreDFB的调用堆栈是为了实现什么功能？
+                ~/src/core/CoreDFB_real.cpp         ICore_Real::CreateSurface()
+                    ~/src/core/surface.c            dfb_surface_create()
+                        ~/src/core/core.c           dfb_core_create_surface()   合法性判断之后，创建fusion对象
+                            ~/lib/fusion/object.c   fusion_object_create()      coredfb具有几个池，保存了诸如表面、图像状态、图层上下文等等。所有这些池都是由fusion处理的。
+
+9. IDirectFBSurface::BatchBlit()
+--------------------------------
+本体是IDirectFBSurface\_BatchBlit()
+
+        ~/src/display/idirectfbsurface.c                    IDirectFBSurface_BatchBlit()
+            ~/src/core/CoreGraphicsStateClient.cpp          CoreGraphicsStateClient_Blit()  
+                ~/src/core/CoreGraphicsState.cpp            CoreGraphicsState_Blit()
+                    ~/src/core/CoreGraphicsState_real.cpp   IGraphicsState_Real::Blit()     如果不启用加速的话，会调用dfb_gfxcard_batchblit；如果启用加速的话，还会判断是硬件加速还是其他加速，硬件加速调用card->funcs.Blit，其他加速调用gBlit。
+                        ~/src/gfx/generic/generic_blit.c    gBlit()                         gBlit支持翻转和旋转。
