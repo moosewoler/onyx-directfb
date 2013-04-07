@@ -91,6 +91,8 @@ main( int argc, char *argv[] )
 
      // T-ONYX-051: 不使用VT
      DirectFBSetOption( "no-vt", NULL );
+     // 禁用tslib
+     DirectFBSetOption( "disable-module", "tslib" );
 
      /* Create the super interface. */
      ret = DirectFBCreate( &dfb );

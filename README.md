@@ -44,6 +44,16 @@ fbdev.c中定义的system开头的函数，都由~/src/core/core\_system.h声明
         ~/src/directfb.c    DirectFBInit()
         ~/src/misc/conf.c   dfb_config_init()
 
+5. DirectFBSetOption()
+-----------------
+DirectFBSetOption()的作用与rc文件相同。DirectFB包括三套配置——dfb、fusion、direct。dfb_config_set()在最后会分别调用fusion和direct的配置函数。
+
+        ~/src/directfb.c                DirectFBSetOption()
+            ~/src/misc/conf.c           dfb_config_set()
+                ~/lib/fusion/conf.c     fusion_config_set()
+                ~/lib/direct/conf.c     direct_config_set()
+
+
 5. DirectFBCreate(&directfb\_interface\_instance)
 -------------------------------------------------
         ~/src/directfb.c                                DirectFBCreate()

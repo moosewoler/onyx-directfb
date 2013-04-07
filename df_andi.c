@@ -464,7 +464,8 @@ static void init_resources( int argc, char *argv[] )
 
      // MWO: 第一步DirectFBInit()，初始化DirectFB。主要是初始化“配置系统”。从这个时间点后，系统具有解析参数的功能。
      DFBCHECK(DirectFBInit( &argc, &argv ));
-     DirectFBSetOption( "no-vt", NULL );        // 由于onyx没有tty0，所以姑且禁用vt
+     DirectFBSetOption( "no-vt", NULL );                // 由于onyx没有tty0，所以姑且禁用vt
+     DirectFBSetOption( "disable-module", "tslib" );    // 禁用tslib
 
      if (argc > 1 && !strcmp( argv[1], "-a" )) {
           alpha = true;

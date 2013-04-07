@@ -5,8 +5,10 @@ AM_CPPFLAGS = \
 	-DDATADIR=\"${datarootdir}/directfb-examples\" \
 	-DFONT=\"$(fontsdatadir)/decker.ttf\"
 
-all: dfbinfo df_andi
+all: dfbinfo dfb_simple df_andi
 dfbinfo:
 	${CC} ${CFLAGS} ${LDFLAGS} $@.c -o ${BUILD_DIR}/$@
+dfb_simple:
+	${CC} ${CFLAGS} ${AM_CFLAGS} ${AM_CPPFLAGS} ${LDFLAGS} $@.c -o ${BUILD_DIR}/$@
 df_andi:
 	${CC} ${CFLAGS} ${AM_CFLAGS} ${AM_CPPFLAGS} ${LDFLAGS} $@.c -o ${BUILD_DIR}/$@
